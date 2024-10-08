@@ -1,4 +1,4 @@
-[English](/README.md) | [Chinese](/README.zh.md) | [Español](/README.es_ES.md)
+[English](/README.md) | [中文](/README.zh_CN.md) | [Español](/README.es_ES.md) | [Русский](/README.ru_RU.md)
 
 <p align="center"><a href="#"><img src="./media/3X-UI.png" alt="Image"></a></p>
 
@@ -32,10 +32,10 @@ bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.
 
 ## Instalar una Versión Personalizada
 
-Para instalar la versión deseada, agrega la versión al final del comando de instalación. Por ejemplo, ver `v2.3.13`:
+Para instalar la versión deseada, agrega la versión al final del comando de instalación. Por ejemplo, ver `v2.4.3`:
 
 ```
-bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh) v2.3.13
+bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh) v2.4.3
 ```
 
 ## Certificado SSL
@@ -177,19 +177,58 @@ eliminar 3x-ui de docker
 
 </details>
 
+## Configuración de Nginx
+<details>
+  <summary>Haga clic aquí para configurar el proxy inverso</summary>
+
+#### Proxy inverso Nginx
+```nginx
+location / {
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header Host $http_host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header Range $http_range;
+    proxy_set_header If-Range $http_if_range; 
+    proxy_redirect off;
+    proxy_pass http://127.0.0.1:2053;
+}
+```
+
+#### Nginx sub-path
+- EAsegúrese de que la "Ruta Raíz de la URL del Panel" en la configuración del panel `/sub` es la misma.
+- El `url` en la configuración del panel debe terminar con `/`.   
+
+```nginx
+location /sub {
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header Host $http_host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header Range $http_range;
+    proxy_set_header If-Range $http_if_range; 
+    proxy_redirect off;
+    proxy_pass http://127.0.0.1:2053;
+}
+```
+</details>
 
 ## SO Recomendados
 
 - Ubuntu 20.04+
 - Debian 11+
 - CentOS 8+
+- OpenEuler 22.03+
 - Fedora 36+
 - Arch Linux
+- Parch Linux
 - Manjaro
 - Armbian
-- AlmaLinux 9+
-- Rockylinux 9+
+- AlmaLinux 8.0+
+- Rocky Linux 8+
+- Oracle Linux 8+
 - OpenSUSE Tubleweed
+- Amazon Linux 2023
 
 ## Arquitecturas y Dispositivos Compatibles
 
@@ -241,88 +280,103 @@ Nuestra plataforma ofrece compatibilidad con una amplia gama de arquitecturas y 
 - Soporta exportar/importar base de datos desde el panel
 
 
-## Configuraciones por Defecto
+## Configuración Predeterminada del Panel
 
 <details>
-  <summary>Haz clic para detalles de las configuraciones por defecto</summary>
+  <summary>Haz clic para ver los detalles de la configuración predeterminada</summary>
 
-  ### Información
+### Nombre de usuario, Contraseña, Puerto y Ruta Base Web
 
+Si elige no modificar estas configuraciones, se generarán aleatoriamente (esto no se aplica a Docker).
+
+**Configuraciones predeterminadas para Docker:**
+- **Nombre de usuario:** admin
+- **Contraseña:** admin
 - **Puerto:** 2053
-- **Usuario y Contraseña:** Se generarán aleatoriamente si omites la modificación.
+
+### Gestión de la Base de Datos:
+
+  Puedes realizar copias de seguridad y restauraciones de la base de datos directamente desde el panel.
+
 - **Ruta de la Base de Datos:**
-  - /etc/x-ui/x-ui.db
-- **Ruta de Configuración de Xray:**
-  - /usr/local/x-ui/bin/config.json
-- **Ruta del Panel Web sin Implementar SSL:**
-  - http://ip:2053/panel
-  - http://domain:2053/panel
-- **Ruta del Panel Web con Implementación de SSL:**
-  - https://domain:2053/panel
- 
+  - `/etc/x-ui/x-ui.db`
+
+### Ruta Base Web
+
+1. **Restablecer la Ruta Base Web:**
+   - Abre tu terminal.
+   - Ejecuta el comando `x-ui`.
+   - Selecciona la opción `Restablecer la Ruta Base Web`.
+
+2. **Generar o Personalizar la Ruta:**
+   - La ruta se generará aleatoriamente, o puedes ingresar una ruta personalizada.
+
+3. **Ver Configuración Actual:**
+   - Para ver tu configuración actual, utiliza el comando `x-ui settings` en el terminal o selecciona `Ver Configuración Actual` en `x-ui`.
+
+### Recomendación de Seguridad:
+- Para mayor seguridad, utiliza una palabra larga y aleatoria en la estructura de tu URL.
+
+**Ejemplos:**
+- `http://ip:port/*webbasepath*/panel`
+- `http://domain:port/*webbasepath*/panel`
+
 </details>
 
-## Configuración WARP
+## Configuración de WARP
 
 <details>
-  <summary>Haz clic para detalles de la configuración WARP</summary>
+  <summary>Haz clic para ver los detalles de la configuración de WARP</summary>
 
 #### Uso
 
-Si deseas usar enrutamiento a WARP antes de la versión v2.1.0, sigue los pasos a continuación:
+**Para versiones `v2.1.0` y posteriores:**
 
-**1.** Instala WARP en **Modo de Proxy SOCKS**:
-
-   ```sh
-   bash <(curl -sSL https://raw.githubusercontent.com/hamid-gh98/x-ui-scripts/main/install_warp_proxy.sh)
-   ```
-
-**2.** Si ya instalaste warp, puedes desinstalarlo usando el siguiente comando:
-
-   ```sh
-   warp u
-   ```
-
-**3.** Activa la configuración que necesites en el panel
-
-   Características de Configuración:
-
-   - Bloquear Anuncios
-   - Enrutar Google + Netflix + Spotify + OpenAI (ChatGPT) a WARP
-   - Corregir error 403 de Google
+WARP está integrado, no se requiere instalación adicional. Simplemente habilita la configuración necesaria en el panel.
 
 </details>
 
 ## Límite de IP
 
 <details>
-  <summary>Haz clic para más detalles del límite de IP</summary>
+  <summary>Haz clic para ver los detalles del límite de IP</summary>
 
 #### Uso
 
-**Nota:** El Límite de IP no funcionará correctamente cuando se use IP Tunnel
+**Nota:** El Límite de IP no funcionará correctamente cuando uses Túnel IP.
 
-- Para versiones hasta `v1.6.1`:
-
+- **Para versiones hasta `v1.6.1`:**
   - El límite de IP está integrado en el panel.
 
-- Para versiones `v1.7.0` y posteriores:
+**Para versiones `v1.7.0` y posteriores:**
 
-  - Para que el Límite de IP funcione correctamente, necesitas instalar fail2ban y sus archivos requeridos siguiendo estos pasos:
+Para habilitar la funcionalidad de límite de IP, necesitas instalar `fail2ban` y los archivos requeridos siguiendo estos pasos:
 
-    1. Usa el comando `x-ui` dentro de la terminal.
-    2. Selecciona `Gestión de Límite de IP`.
-    3. Elige las opciones apropiadas según tus necesidades.
-   
-  - asegúrate de tener ./access.log en tu Configuración de Xray después de la v2.1.3 tenemos una opción para ello
-  
-  ```sh
+1. Ejecuta el comando `x-ui` en el terminal, luego elige `Gestión de Límite de IP`.
+2. Verás las siguientes opciones:
+
+   - **Cambiar la Duración del Bloqueo:** Ajustar la duración de los bloqueos.
+   - **Desbloquear a Todos:** Levantar todos los bloqueos actuales.
+   - **Revisar los Registros:** Revisar los registros.
+   - **Estado de Fail2ban:** Verificar el estado de `fail2ban`.
+   - **Reiniciar Fail2ban:** Reiniciar el servicio `fail2ban`.
+   - **Desinstalar Fail2ban:** Desinstalar Fail2ban con la configuración.
+
+3. Agrega una ruta para el registro de acceso en el panel configurando `Xray Configs/log/Access log` a `./access.log`, luego guarda y reinicia Xray.
+
+- **Para versiones anteriores a `v2.1.3`:**
+  - Necesitas configurar manualmente la ruta del registro de acceso en tu configuración de Xray:
+
+    ```sh
     "log": {
       "access": "./access.log",
       "dnsLog": false,
       "loglevel": "warning"
     },
-  ```
+    ```
+
+- **Para versiones `v2.1.3` y posteriores:**
+  - Hay una opción para configurar `access.log` directamente desde el panel.
 
 </details>
 
@@ -373,7 +427,7 @@ El panel web admite tráfico diario, inicio de sesión en el panel, copia de seg
 
 - Inicia [Botfather](https://t.me/BotFather) en tu cuenta de Telegram:
     ![Botfather](./media/botfather.png)
-  
+
 - Crea un nuevo bot usando el comando /newbot: Te hará 2 preguntas, Un nombre y un nombre de usuario para tu bot. Ten en cuenta que el nombre de usuario debe terminar con la palabra "bot".
     ![Create new bot](./media/newbot.png)
 
@@ -398,6 +452,7 @@ Ingresa el ID de chat de usuario en el campo de entrada número 4. Las cuentas d
 
 #### Uso
 
+- [Documentación de API](https://documenter.getpostman.com/view/5146551/2sAXxP8Y12)
 - `/login` con `POST` datos de usuario: `{username: '', password: ''}` para iniciar sesión
 - `/panel/api/inbounds` base para las siguientes acciones:
 
@@ -427,9 +482,7 @@ Ingresa el ID de chat de usuario en el campo de entrada número 4. Las cuentas d
 - `client.password` para TROJAN
 - `client.email` para Shadowsocks
 
-
-- [Documentación de API](https://documenter.getpostman.com/view/16802678/2s9YkgD5jm)
-- [<img src="https://run.pstmn.io/button.svg" alt="Run In Postman" style="width: 128px; height: 32px;">](https://app.getpostman.com/run-collection/16802678-1a4c9270-ac77-40ed-959a-7aa56dc4a415?action=collection%2Ffork&source=rip_markdown&collection-url=entityId%3D16802678-1a4c9270-ac77-40ed-959a-7aa56dc4a415%26entityType%3Dcollection%26workspaceId%3D2cd38c01-c851-4a15-a972-f181c23359d9)
+- [<img src="https://run.pstmn.io/button.svg" alt="Run In Postman" style="width: 128px; height: 32px;">](https://god.gw.postman.com/run-collection/5146551-e6aac565-e0e2-46df-acff-2607a51bbd04?action=collection%2Ffork&source=rip_markdown&collection-url=entityId%3D5146551-e6aac565-e0e2-46df-acff-2607a51bbd04%26entityType%3Dcollection%26workspaceId%3Dd64f609f-485a-4951-9b8f-876b3f917124)
 </details>
 
 ## Variables de Entorno
